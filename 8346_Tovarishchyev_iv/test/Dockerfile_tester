@@ -1,0 +1,33 @@
+FROM ubuntu:22.04
+
+WORKDIR /test
+
+COPY ./tests .
+
+COPY id_rsa.pub /root/.ssh/authorized_keys
+
+RUN apt-get update && apt-get install -y \
+    openssh-server=1:8.9p1-3ubuntu0.1 \
+    python3-pip=22.0.2+dfsg-1ubuntu0.2 \
+    python3=3.10.6-1~22.04 \
+    git=1:2.34.1-1ubuntu1.9 \
+    xvfb=2:21.1.4-2ubuntu1.7~22.04.1 \
+    devscripts=2.22.1ubuntu1 \
+    libgtk-3-0=3.24.33-1ubuntu2 \
+    libdbus-glib-1-2=0.112-2build1 \
+    libasound2=1.2.6.1-1ubuntu1 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install black pylint selenium==4.5.0
+
+RUN mkdir -p /var/run/sshd
+
+RUN wget -O firefox-setup.tar.bz2 "https://download.mozilla.org/?product=firefox-latest&os=linux64" \
+    && tar -xvjf firefox-setup.tar.bz2 \
+    && ln -s /usr/local/firefox/firefox /usr/bin/firefox \
+    && wget https://github.com/mozilla/geckodriver/releases/download/v0.33.0/geckodriver-v0.33.0-linux64.tar.gz \
+    && tar -xvzf geckodriver* \
+    && cp geckodriver /usr/bin/geckodriver \
+    && chmod 755 /usr/bin/geckodriver
+
+ENTRYPOINT ["./test_all.sh"]

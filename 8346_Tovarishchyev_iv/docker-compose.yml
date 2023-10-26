@@ -1,0 +1,23 @@
+version: "3"
+services:
+  app:
+    ports:
+      - "127.0.0.1:5000:5000"
+      - "127.0.0.1:5022:22"
+    build:
+      context: ./app
+      dockerfile: Dockerfile_app
+      ssh:
+        - default
+    deploy:
+      resources:
+        limits:
+          memory: 1000M          
+  tester:
+    ports:
+      - "127.0.0.1:5021:22"
+    build:
+      context: ./test
+      dockerfile: Dockerfile_tester
+    depends_on:
+      - app
